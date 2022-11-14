@@ -113,17 +113,19 @@ public class Main implements IRC3 {
         _addTokenTo(_tokenId, caller);
         tokenHolder.set(_tokenId, caller);
         Transfer(ZERO_ADDRESS, caller, _tokenId);
+        Minted(caller,_tokenId);
     }
 
     @External
     public void burn(BigInteger _tokenId){
         Address owner=ownerOf(_tokenId);
-        Context.require(Context.getCaller().equals(Context.getOwner())); //only owner can mint
+        Context.require(Context.getCaller().equals(owner),"Only owner of the NFT can burn.");
 
         approvals.set(_tokenId,ZERO_ADDRESS);
         _removeTokenFrom(_tokenId, owner);
         tokenHolder.set(_tokenId,ZERO_ADDRESS);
         Transfer(owner, ZERO_ADDRESS, _tokenId);
+        Burned(owner,_tokenId);
     }
 
     @EventLog(indexed =3)
@@ -132,6 +134,14 @@ public class Main implements IRC3 {
 
     @EventLog(indexed = 3)
     public void Approval(Address _owner, Address _approved, BigInteger _tokenId) {
+    }
+
+    @EventLog(indexed = 2)
+    public void Minted(Address _by,BigInteger _tokenId){
+    }
+
+    @EventLog(indexed = 2)
+    public void Burned(Address _by,BigInteger _tokenId){
     }
 
     private boolean _tokenExists(BigInteger _tokenId) {
