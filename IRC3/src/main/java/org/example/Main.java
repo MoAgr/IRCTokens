@@ -106,7 +106,7 @@ public class Main implements IRC3 {
     @External @Payable
     public void mint(BigInteger _tokenId){
         Address caller=Context.getCaller();
-//        Context.require(!ZERO_ADDRESS.equals(caller), "Destination address cannot be zero address");
+        Context.require(!ZERO_ADDRESS.equals(caller), "Destination address cannot be zero address");
         Context.require(!_tokenExists(_tokenId), "Token already exists");
         Context.require(Context.getValue().equals(mintCost), "Please pay 1 icx to mint.");
 
