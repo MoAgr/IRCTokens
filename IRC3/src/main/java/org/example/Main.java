@@ -5,12 +5,14 @@ import com.iconloop.score.util.IntSet;
 import score.*;
 import score.annotation.EventLog;
 import score.annotation.External;
+import score.annotation.Payable;
 
 import java.math.BigInteger;
 
 public class Main implements IRC3 {
 
     private static final Address ZERO_ADDRESS = new Address(new byte[Address.LENGTH]);
+    private static final BigInteger mintCost = new BigInteger("1000000000000000000");
     private final VarDB<String> name= Context.newVarDB("token_name",String.class);
     private final VarDB<String> symbol= Context.newVarDB("token_symbol",String.class);
     //owner=>set of tokens
@@ -101,15 +103,16 @@ public class Main implements IRC3 {
         Transfer(_from,_to,_tokenId);
     }
 
-    @External
-    public void mint(Address to,BigInteger _tokenId){
-        Context.require(Context.getCaller().equals(Context.getOwner())); //only owner can mint
-        Context.require(!ZERO_ADDRESS.equals(to), "Destination address cannot be zero address");
+    @External @Payable
+    public void mint(BigInteger _tokenId){
+        Address caller=Context.getCaller();
+//        Context.require(!ZERO_ADDRESS.equals(caller), "Destination address cannot be zero address");
         Context.require(!_tokenExists(_tokenId), "Token already exists");
+        Context.require(Context.getValue().equals(mintCost), "Please pay 1 icx to mint.");
 
-        _addTokenTo(_tokenId, to);
-        tokenHolder.set(_tokenId, to);
-        Transfer(ZERO_ADDRESS, to, _tokenId);
+        _addTokenTo(_tokenId, caller);
+        tokenHolder.set(_tokenId, caller);
+        Transfer(ZERO_ADDRESS, caller, _tokenId);
     }
 
     @External
