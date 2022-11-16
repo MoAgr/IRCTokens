@@ -94,6 +94,9 @@ public class Main implements IRC3 {
 
         tokenHolder.set(_tokenId,_to);
         IntSet receiverTokens=holderTokens.get(_to);
+        if(receiverTokens==null){
+            receiverTokens=new IntSet(_to.toString());
+        }
         receiverTokens.add(_tokenId);
         holderTokens.set(_to,receiverTokens);
 
@@ -108,12 +111,16 @@ public class Main implements IRC3 {
         Address caller=Context.getCaller();
         Context.require(!ZERO_ADDRESS.equals(caller), "Destination address cannot be zero address");
         Context.require(!_tokenExists(_tokenId), "Token already exists");
-        Context.require(Context.getValue().equals(mintCost), "Please pay 1 icx to mint.");
+        Context.require(getPaidValue().equals(mintCost), "Please pay 1 icx to mint.");
 
         _addTokenTo(_tokenId, caller);
         tokenHolder.set(_tokenId, caller);
         Transfer(ZERO_ADDRESS, caller, _tokenId);
         Minted(caller,_tokenId);
+    }
+
+    public BigInteger getPaidValue(){
+        return Context.getValue();
     }
 
     @External
