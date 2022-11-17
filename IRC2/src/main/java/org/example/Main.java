@@ -103,7 +103,7 @@ public class Main implements IRC2 {
     @External
     public void transferFrom(Address _from,Address _to, BigInteger _value, @Optional byte[] _data){
         Context.require(_value.compareTo(BigInteger.ZERO)>0,"Can only transfer positive tokens!");
-        Context.require(getAllowance(_from).compareTo(_value)>0,"Not Approved for the given value");
+        Context.require(getAllowance(_from).compareTo(_value)>=0,"Not Approved for the given value");
         Context.require(!_to.equals(ZERO_ADDRESS),"Cannot send to zero address!");
         Context.require(balanceOf(_from).compareTo(_value)>=0,"Insufficient balance!");
 
