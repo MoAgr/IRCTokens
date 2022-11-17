@@ -60,8 +60,12 @@ public class Main implements IRC3 {
     public void approve(Address _to, BigInteger _tokenId) {
         Address _owner=Context.getCaller();
         Context.require(_owner.equals(ownerOf(_tokenId)),"Not the owner!");
-        approvals.set(_tokenId,_to);
+        _approve(_to,_tokenId);
         Approval(_owner,_to,_tokenId);
+    }
+
+    private void _approve(Address _to,BigInteger _tokenId){
+        approvals.set(_tokenId,_to);
     }
 
     @External
@@ -70,17 +74,16 @@ public class Main implements IRC3 {
         Context.require(ownerOf(_tokenId).equals(_from),"Access denied.");
         Context.require(!_to.equals(ZERO_ADDRESS),"Cannot transfer to zero address.");
 
+        _approve(ZERO_ADDRESS,_tokenId); //clearing approvals
+
         tokenHolder.set(_tokenId,_to);
-        IntSet receiverTokens=holderTokens.get(_to);
-        if(receiverTokens==null){
-            receiverTokens=new IntSet(_to.toString());
-        }
-        receiverTokens.add(_tokenId);
-        holderTokens.set(_to,receiverTokens);
+        _addTokenTo(_tokenId,_to);
 
         IntSet giverTokens=holderTokens.get(_from);
         giverTokens.remove(_tokenId);
         holderTokens.set(_from,giverTokens);
+
+
 
         Transfer(_from,_to,_tokenId);
     }
@@ -92,13 +95,10 @@ public class Main implements IRC3 {
         Context.require(_from.equals(ownerOf(_tokenId)),"From address is not the owner.");
         Context.require(!_to.equals(ZERO_ADDRESS),"Cannot transfer to zero address.");
 
+        _approve(ZERO_ADDRESS,_tokenId);
+
         tokenHolder.set(_tokenId,_to);
-        IntSet receiverTokens=holderTokens.get(_to);
-        if(receiverTokens==null){
-            receiverTokens=new IntSet(_to.toString());
-        }
-        receiverTokens.add(_tokenId);
-        holderTokens.set(_to,receiverTokens);
+        _addTokenTo(_tokenId,_to);
 
         IntSet giverTokens=holderTokens.get(_from);
         giverTokens.remove(_tokenId);
